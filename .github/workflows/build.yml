@@ -51,7 +51,7 @@ jobs:
           push: true
           tags: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{ steps.versionLowercase.outputs.lowercase }}-dev
       # build push STAG
-      - name: Build and push DEV
+      - name: Build and push STAG
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
@@ -59,7 +59,7 @@ jobs:
           push: true
           tags: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{ steps.versionLowercase.outputs.lowercase }}-stag
       # build push PROD
-      - name: Build and push DEV
+      - name: Build and push PROD
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
