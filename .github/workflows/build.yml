@@ -55,23 +55,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      # Consigo la versión
       - name: get-pom-version
         id: pom-version
         uses: CptMokoena/maven-get-version-action@main
+      # Me logeo en github registry
       - name: Log in to the Container registry
         uses: docker/login-action@f054a8b539a109f9f41c372932f1ae047eff08c9
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      # Paso a lowercase la versión (repo name format)
+      - id: versionLowercase
+        uses: ASzc/change-string-case-action@v1
+        with:
+          string: ${{ steps.pom-version.outputs.version }}
+      # build push DEV
       - name: Build and push DEV
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
           build-args: JAR_FILE=shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
           push: true
-          tags: ${{ steps.pom-version.outputs.version }}-DEV
+          tags: ${{ steps.versionLowercase.outputs.lowercase }}-dev
           labels: ${{ steps.meta.outputs.labels }}
+      # build push STAG
       - name: Build and push DEV
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
@@ -80,6 +89,7 @@ jobs:
           push: true
           tags: ${{ steps.pom-version.outputs.version }}-STAG
           labels: ${{ steps.meta.outputs.labels }}
+      # build push PROD
       - name: Build and push DEV
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
