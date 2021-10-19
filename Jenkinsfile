@@ -1,46 +1,82 @@
+#!groovy
 pipeline {
-    parameters {
-        string(name: 'Branch', defaultValue: 'master', description: 'Branch')
-    }
+    agent any
+    triggers { pollSCM 'H/5 * * * *' }
     stages {
-        stage('Build & Unit Test & Sonar') {
+        stage('Source checkout') {
             steps {
-                script {
-                    projectCheckout("https://github.com/DIYvegAn/shipping-ac1.git")
-                    // Encadena el build, los tests y sonar
-                    sh "mvn verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=AC1"
-                }
+                checkout(
+                        [
+                                $class                           : 'GitSCM',
+                                branches                         : [],
+                                browser                          : [],
+                                doGenerateSubmoduleConfigurations: false,
+                                extensions                       : [],
+                                submoduleCfg                     : [],
+                                userRemoteConfigs                : [
+                                        [
+                                                url: 'git@github.com:DIYvegAn/shipping-ac1.git'
+                                        ]
+                                ]
+                        ]
+                )
+                stash 'dockerfile-source'
             }
         }
         stage('Build Images') {
-            steps {
-                docker.withTool('docker') {
-                    print "Instalado Docker"
-
+            parallel {
+                stage('DEV') {
+                    agent any
+                    environment {
+                        AMBIENTE = 'DEV'
+                    }
+                    steps {
+                        unstash 'dockerfile-source'
+                        println "Ejecutando: ${env.AMBIENTE}"
+                        script {
+                            dockerImage = docker.build "${version}-${env.AMBIENTE}"
+                        }
+                    }
+                }
+                stage('STAGING') {
+                    agent any
+                    environment {
+                        AMBIENTE = 'STAGING'
+                    }
+                    steps {
+                        unstash 'dockerfile-source'
+                        println "Ejecutando: ${env.AMBIENTE}"
+                        script {
+                            dockerImage = docker.build "${version}-${env.AMBIENTE}"
+                        }
+                    }
+                }
+                stage('PROD') {
+                    agent any
+                    environment {
+                        AMBIENTE = 'PROD'
+                    }
+                    steps {
+                        unstash 'dockerfile-source'
+                        println "Ejecutando: ${env.AMBIENTE}"
+                        script {
+                            buildImage
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-def cleanImage(imageName, c) {
-    try {
-        c(imageName)
-    } finally {
-        ret = sh returnStatus: true, script: "docker rmi ${imageName}"
-        if (ret != 0) {
-            print("Ocurrio un error borrando la imagen ${imageName}")
-        }
+void push(String registryCredential, String ambiente) {
+    docker.withRegistry('', registryCredential) {
+        dockerImage.push("${ambiente}")
+        dockerImage.push('latest')
     }
 }
 
-def projectCheckout(String project) {
-    checkout([$class                           : 'GitSCM',
-              branches                         : [[name: "*/${params.Branch}"]],
-              doGenerateSubmoduleConfigurations: false,
-              // extensions                       : [[$class: 'RelativeTargetDirectory', relativeTargetDir: "${project}"]],
-              gitTool                          : 'jgit',
-              submoduleCfg                     : [],
-              userRemoteConfigs                : [[credentialsId: '15940393-32ad-416e-ad80-b8ea71536641',
-                                                   url          : "${project}"]]])
+String buildImage(String version, String imageName, List<String> Args) {
+    def img = docker.build "${version}-${env.AMBIENTE}"
+    return img
 }
