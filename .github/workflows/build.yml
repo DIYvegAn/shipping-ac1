@@ -49,7 +49,7 @@ jobs:
           context: .
           build-args: JAR_FILE=target/shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
           push: true
-          tags: ${{ steps.versionLowercase.outputs.lowercase }}-dev
+          tags: ${{env.REGISTRY}}/${{env.IMAGE_NAME}}:${{ steps.versionLowercase.outputs.lowercase }}-dev
       # build push STAG
       - name: Build and push DEV
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
