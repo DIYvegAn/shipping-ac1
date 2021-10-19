@@ -76,7 +76,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          build-args: JAR_FILE=shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
+          build-args: JAR_FILE=target/shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
           push: true
           tags: ${{ steps.versionLowercase.outputs.lowercase }}-dev
           labels: ${{ steps.meta.outputs.labels }}
@@ -85,7 +85,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          build-args: JAR_FILE=shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
+          build-args: JAR_FILE=target/shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
           push: true
           tags: ${{ steps.pom-version.outputs.version }}-STAG
           labels: ${{ steps.meta.outputs.labels }}
@@ -94,7 +94,7 @@ jobs:
         uses: docker/build-push-action@ad44023a93711e3deb337508980b4b5e9bcdc5dc
         with:
           context: .
-          build-args: JAR_FILE=shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
+          build-args: JAR_FILE=target/shipping-service-example-${{ steps.pom-version.outputs.version }}.jar
           push: true
           tags: ${{ steps.pom-version.outputs.version }}-PROD
           labels: ${{ steps.meta.outputs.labels }}
