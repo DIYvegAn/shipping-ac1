@@ -28,7 +28,7 @@ jobs:
           java-version: 8
       # Run Tests & Package
       - name: Build project with Maven
-        run: ./mvnw -B test package --file pom.xml
+        run: ./mvnw -B package --file pom.xml
       - name: Tests with Maven
         run: ./mvnw test
       # JDK 11 para Sonar
