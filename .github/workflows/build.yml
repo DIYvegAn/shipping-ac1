@@ -30,7 +30,7 @@ jobs:
       # Run Tests & Package
       - name: Build project with Maven
         run: ./mvnw -B test package --file pom.xml
-      - name: Build project with Maven
+      - name: Tests with Maven
         run: ./mvnw test
       # JDK 11 para Sonar
       - name: Set up JDK 11
